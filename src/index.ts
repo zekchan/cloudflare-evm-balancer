@@ -1,18 +1,36 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { Hono } from 'hono'
+import { DurableObject } from "cloudflare:workers";
+import { env } from 'hono/adapter';
 
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
-	},
-} satisfies ExportedHandler<Env>;
+const app = new Hono()
+
+app.get('/', async (c) => {
+	const { UPSTREAM_DO, CHAIN_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject>, CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+	const upstreamId = UPSTREAM_DO.idFromName("testupstream");
+	const upstream = UPSTREAM_DO.get(upstreamId);
+	const chainId = CHAIN_DO.idFromName("testchain");
+	const chain = CHAIN_DO.get(chainId);
+	return c.text(await upstream.sayHello() + " " + await chain.sayHello());
+})
+
+export default app
+
+export class UpstreamDurableObject extends DurableObject<Env> {
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+	}
+
+	async sayHello(): Promise<string> {
+		return "Hello from UpstreamDurableObject";
+	}
+}
+
+export class ChainDurableObject extends DurableObject<Env> {
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+	}
+
+	async sayHello(): Promise<string> {
+		return "Hello from ChainDurableObject";
+	}
+}
