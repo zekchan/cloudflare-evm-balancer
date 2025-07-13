@@ -71,6 +71,13 @@ app.get('/get_chains', async (c) => {
 		}));
 	return c.json(heights);
 })
+app.post('/:chain', async (c) => {
+	const { CHAIN_DO } = env<{ CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+	const chain = c.req.param('chain');
+	const chainDOId = CHAIN_DO.idFromName(chain);
+	const chainDO = CHAIN_DO.get(chainDOId);
+	return chainDO.fetch(c.req.raw);
+})
 export default app
 
 export { UpstreamDurableObject, ChainDurableObject }

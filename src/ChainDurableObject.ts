@@ -43,5 +43,10 @@ export class ChainDurableObject extends DurableObject<Env> {
         const upstream = await this.getBestUpstream();
         return await upstream.getHeight() || 0
     }
+    // proxy request to best upstream
+    async fetch(request: Request): Promise<Response> {
+        const upstream = await this.getBestUpstream();
+        return upstream.fetch(request); // just proxy in raw mode
+    }
 
 }

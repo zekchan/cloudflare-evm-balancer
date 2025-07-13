@@ -54,4 +54,11 @@ export class UpstreamDurableObject extends DurableObject<Env> {
             this.ctx.storage.setAlarm(Date.now() + 30 * 1000);
         }
     }
+    async fetch(request: Request):  Promise<Response> {
+        const url = await this.ctx.storage.get<string>("url");
+        if (!url) {
+            return new Response("No url found", { status: 500 });
+        }
+        return fetch(url, request); // just proxy in raw mode
+    }
 }
