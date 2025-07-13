@@ -59,6 +59,11 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         if (!url) {
             return new Response("No url found", { status: 500 });
         }
+        // TODO: intercept request AND
+        // make fix all headers
+        // normilize body, chage id, validate something
+        // handlre response and errors.
+        // Maybe do that in chain and not it upstream
         return fetch(url, request); // just proxy in raw mode
     }
 }
