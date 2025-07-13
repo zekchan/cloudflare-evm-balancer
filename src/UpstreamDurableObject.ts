@@ -10,11 +10,12 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         await this.ctx.storage.setAlarm(Date.now() + 1000);
         this.updateHeight();
     }
-    private async getUrl(): Promise<string | undefined> {
-        return await this.ctx.storage.get<string>("url");
+
+    async getHeight(): Promise<string | undefined> {
+        return this.ctx.storage.get<string>("height");
     }
     private async updateHeight() {
-        const url = await this.getUrl();
+        const url = await this.ctx.storage.get<string>("url");
         if (!url) {
             return;
         }
@@ -34,9 +35,6 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         if (result && result.result) {
             await this.ctx.storage.put("height", result.result);
         }
-    }
-    async getHeight(): Promise<string | undefined> {
-        return this.ctx.storage.get<string>("height");
     }
     async alarm(): Promise<void> {
         try {
