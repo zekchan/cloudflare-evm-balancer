@@ -11,9 +11,24 @@ function normalizeHeight(height: string | number | undefined): number {
     }
     return 0;
 }
+type Stats = {
+    count: number;
+    totalTime: number;
+    errors: number;
+}
 export class UpstreamDurableObject extends DurableObject<Env> {
+    private stats: Record<string, Stats> = {};
+    private async saveStats() {
+        await this.ctx.storage.put("stats", this.stats);
+    }
+    private async restoreStats() {
+        this.stats = await this.ctx.storage.get<Record<string, Stats>>("stats") || {};
+    }
     constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
+        this.ctx.blockConcurrencyWhile(async () => {
+            await this.restoreStats();
+        });
     }
     async setUrl(url: string) {
         await this.ctx.storage.put("url", url);
@@ -29,10 +44,18 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         if (!url) {
             return;
         }
-        return fetch(url, {
+        const start = Date.now();
+        const response = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 })
-        })
+        });
+        const end = Date.now();
+        const duration = end - start;
+        const stats = this.stats[method] || { count: 0, totalTime: 0, errors: 0 };
+        stats.count++;
+        stats.totalTime += duration;
+        this.stats[url] = stats;
+        return response;
     }
     private async updateHeight() {
         const response = await this.request("eth_blockNumber", []);
@@ -54,7 +77,7 @@ export class UpstreamDurableObject extends DurableObject<Env> {
     }
     async alarm(): Promise<void> {
         try {
-            await this.updateHeight();
+            await Promise.all([this.updateHeight(), this.saveStats()]);
         } catch (error) {
         } finally {
             this.ctx.storage.setAlarm(Date.now() + 30 * 1000);
@@ -71,5 +94,8 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         // handlre response and errors.
         // Maybe do that in chain and not it upstream
         return fetch(url, request); // just proxy in raw mode
+    }
+    async getStats(): Promise<Record<string, Stats>> {
+        return this.stats;
     }
 }
