@@ -21,7 +21,6 @@ button {
     @apply focus:outline-none;
     @apply focus:ring-offset-2;
     @apply focus:ring-offset-white;
-    @apply focus:ring-offset-opacity-50;
 }
 a {
     @apply text-blue-500;
