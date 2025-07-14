@@ -1,7 +1,7 @@
 @host = {{$dotenv WORKER_URL}}
 
 ###
-POST {{host}}/admin/upstreams
+POST {{host}}/admin/init_upstreams
 
 ###
 GET {{host}}/admin/chains
