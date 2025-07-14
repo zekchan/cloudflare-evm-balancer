@@ -17,7 +17,7 @@ button {
     @apply transition-colors duration-200;
     @apply border-none;
     @apply outline-none;
-    @apply focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+    @apply focus:ring-2 focus:ring-blue-500;
     @apply focus:outline-none;
     @apply focus:ring-offset-2;
     @apply focus:ring-offset-white;
