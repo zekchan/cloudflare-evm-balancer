@@ -81,7 +81,6 @@ export class UpstreamDurableObject extends DurableObject<Env> {
             stats.errors++;
             return;
         } finally {
-            console.log("FINALY")
             const end = Date.now();
             const duration = end - start;
             stats.count++;
