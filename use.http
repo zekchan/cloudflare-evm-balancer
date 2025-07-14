@@ -22,7 +22,7 @@ GET {{host}}/admin/stats
 Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ### 
-POST {{host}}/bsc
+POST {{host}}/celo
 Content-Type: application/json
 
 {

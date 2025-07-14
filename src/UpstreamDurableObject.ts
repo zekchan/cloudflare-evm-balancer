@@ -16,6 +16,19 @@ type Stats = {
     totalTime: number;
     errors: number;
 }
+interface JsonRpcRequest {
+    id: number;
+    method: string;
+    params: any[];
+}
+interface JsonRpcResponse {
+    id: number;
+    result?: any;
+    error?: {
+        code: number;
+        message: string;
+    }
+}
 export class UpstreamDurableObject extends DurableObject<Env> {
     private stats: Record<string, Stats> = {};
     private async saveStats() {
@@ -45,37 +58,41 @@ export class UpstreamDurableObject extends DurableObject<Env> {
     async getHeight(): Promise<number | undefined> {
         return this.ctx.storage.get<number>("height");
     }
-    private async request(method: string, params: any[]) {
+    private async request(method: string, params: any[]): Promise<JsonRpcResponse| undefined> {
         const url = await this.ctx.storage.get<string>("url");
         if (!url) {
             return;
         }
         const start = Date.now();
+        const stats = this.stats[method] || { count: 0, totalTime: 0, errors: 0 };
         const response = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 })
         });
-        const end = Date.now();
-        const duration = end - start;
-        const stats = this.stats[method] || { count: 0, totalTime: 0, errors: 0 };
-        stats.count++;
-        stats.totalTime += duration;
-        this.stats[method] = stats;
-        return response;
+        try {
+            const result = await response.json<JsonRpcResponse>();
+            
+            if (response.ok && result.result !== undefined) {
+                return result
+            }
+            stats.errors++;
+            return;
+        } catch (error) {
+            stats.errors++;
+            return;
+        } finally {
+            console.log("FINALY")
+            const end = Date.now();
+            const duration = end - start;
+            stats.count++;
+            stats.totalTime += duration;
+            this.stats[method] = stats;
+        }
     }
     private async updateHeight() {
-        const response = await this.request("eth_blockNumber", []);
-        if (!response) {
+        const result = await this.request("eth_blockNumber", []);
+        if (!result) {
             return;
-        }
-        let result;
-        try {
-            result = await response.json<{ result: number }>();
-        } catch (error) {
-        }
-        if (!response.ok) {
-            console.error({ action: "updateHeightError", response, result })
-            return
         }
         if (result && result.result) {
             await this.ctx.storage.put("height", normalizeHeight(result.result));
@@ -96,12 +113,14 @@ export class UpstreamDurableObject extends DurableObject<Env> {
             return new Response("No url found", { status: 500 });
         }
         try {
-            const body = await request.json() as { method: string, params: any[] };
+            const body = await request.json<JsonRpcRequest>();
+            const id = body.id;
             const response = await this.request(body.method, body.params);
             if (!response) {
                 return new Response("No response from upstream", { status: 500 });
             }
-            return response;
+            response.id = id;
+            return new Response(JSON.stringify(response), { status: 200 });
         } catch (error) {
             return new Response("Invalid request", { status: 400 });
         }
