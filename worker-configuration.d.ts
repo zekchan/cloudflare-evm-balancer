@@ -3,8 +3,8 @@
 // Runtime types generated with workerd@1.20250709.0 2025-07-12 
 declare namespace Cloudflare {
 	interface Env {
-		UPSTREAM_DO: DurableObjectNamespace /* UpstreamDurableObject */;
-		CHAIN_DO: DurableObjectNamespace /* ChainDurableObject */;
+		UPSTREAM_DO: DurableObjectNamespace<import("./src/index").UpstreamDurableObject>;
+		CHAIN_DO: DurableObjectNamespace<import("./src/index").ChainDurableObject>;
 	}
 }
 interface Env extends Cloudflare.Env {}

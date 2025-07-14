@@ -2,19 +2,24 @@
 
 ###
 POST {{host}}/admin/init_upstreams
+Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ###
 DELETE {{host}}/admin/clear_storage
+Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ###
 GET {{host}}/admin/chains
+Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 
 ###
 GET {{host}}/admin/upstreams
+Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ###
 GET {{host}}/admin/stats    
+Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ### 
 POST {{host}}/bsc

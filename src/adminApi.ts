@@ -1,13 +1,12 @@
 import { Context, Hono } from 'hono'
-import { UpstreamDurableObject } from './UpstreamDurableObject';
-import { ChainDurableObject } from './ChainDurableObject';
-import { getDONameSpace } from './utils';
 import { getUpstreamConfig } from './config';
+import { basicAuth } from 'hono/basic-auth';
+import { env } from 'cloudflare:workers';
 
 
 const UPSTREAMS = getUpstreamConfig();
+const { UPSTREAM_DO, CHAIN_DO } = env;
 function getUpstreamDOs(c: Context) {
-    const UPSTREAM_DO = getDONameSpace<UpstreamDurableObject>("UPSTREAM_DO");
     return UPSTREAMS.map(({ name }) => {
         const upstreamId = UPSTREAM_DO.idFromName(name);
         const upstream = UPSTREAM_DO.get(upstreamId);
@@ -15,7 +14,6 @@ function getUpstreamDOs(c: Context) {
     })
 }
 function getChainDOs(c: Context) {
-    const CHAIN_DO = getDONameSpace<ChainDurableObject>("CHAIN_DO");
     const chains = new Set(UPSTREAMS.map(({ chain }) => chain));
     return Array.from(chains).map((chain) => {
         const chainDOId = CHAIN_DO.idFromName(chain);
@@ -24,6 +22,10 @@ function getChainDOs(c: Context) {
     })
 }
 export function adminApi(app: Hono) {
+    app.use(basicAuth({
+        username: "admin",
+        password: env.ADMIN_PASSWORD!,
+    }));
     app.delete('/clear_storage', async (c) => {
         await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
             await upstream.clearStorage();
@@ -34,8 +36,6 @@ export function adminApi(app: Hono) {
         return c.json({ message: "ok" });
     })
     app.post('/init_upstreams', async (c) => {
-        const UPSTREAM_DO = getDONameSpace<UpstreamDurableObject>("UPSTREAM_DO");
-        const CHAIN_DO = getDONameSpace<ChainDurableObject>("CHAIN_DO");
         for (const { upstream: upstreamUrl, name, chain } of UPSTREAMS) {
             const upstreamId = UPSTREAM_DO.idFromName(name);
             const upstream = UPSTREAM_DO.get(upstreamId);
