@@ -95,12 +95,16 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         if (!url) {
             return new Response("No url found", { status: 500 });
         }
-        // TODO: intercept request AND
-        // make fix all headers
-        // normilize body, chage id, validate something
-        // handlre response and errors.
-        // Maybe do that in chain and not it upstream
-        return fetch(url, request); // just proxy in raw mode
+        try {
+            const body = await request.json() as { method: string, params: any[] };
+            const response = await this.request(body.method, body.params);
+            if (!response) {
+                return new Response("No response from upstream", { status: 500 });
+            }
+            return response;
+        } catch (error) {
+            return new Response("Invalid request", { status: 400 });
+        }
     }
     async getStats(): Promise<Record<string, Stats>> {
         return this.stats;
