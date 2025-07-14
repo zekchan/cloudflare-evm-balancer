@@ -14,6 +14,9 @@ app.post('/:chain', async (c) => {
 	const chainDO = CHAIN_DO.get(chainDOId);
 	return chainDO.fetch(c.req.raw);
 })
+app.get('/', async (c) => {
+	return c.redirect('/admin/chains');
+})
 
 export default app
 
