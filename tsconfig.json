@@ -41,7 +41,6 @@
 	],
 	"include": [
 		"worker-configuration.d.ts",
-		"customEnv.d.ts",
 		"src/**/*.ts"
 	]
 }

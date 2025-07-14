@@ -1,0 +1,2 @@
+UPSTREAM_CONFIGS=[{"chain":"bsc","name":"publicnode-bsc-mainnet","upstream":"https://bsc-rpc.publicnode.com"},{"chain":"celo","name":"celo1","upstream":"https://forno.celo.org"},{"chain":"celo","name":"drpc-public-celo","upstream":"https://celo.drpc.org"},{"chain":"base","name":"drpc-public-base","upstream":"https://base.drpc.org"},{"chain":"ethereum","name":"drpc-public-ethereum","upstream":"https://eth.drpc.org"},{"chain":"ethereum","name":"publicnode-ethereum-mainnet","upstream":"https://ethereum-rpc.publicnode.com"}]
+ADMIN_PASSWORD=gogogogog
