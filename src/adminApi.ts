@@ -28,7 +28,8 @@ export function adminApi(app: Hono) {
         password: env.ADMIN_PASSWORD!,
     }));
     app.use(json2htmlMiddleware(app));
-    app.delete('/clear_storage', async (c) => {
+    // use post to use form to submit
+    app.post('/clear_storage', async (c) => {
         await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
             await upstream.clearStorage();
         }));

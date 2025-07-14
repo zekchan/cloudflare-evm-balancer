@@ -5,7 +5,7 @@ POST {{host}}/admin/init_upstreams
 Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ###
-DELETE {{host}}/admin/clear_storage
+POST  {{host}}/admin/clear_storage
 Authorization: Basic admin {{$dotenv ADMIN_PASSWORD}}
 
 ###

@@ -1,5 +1,6 @@
 import { Context, Hono, MiddlewareHandler, Next } from "hono";
 import { FC, Child } from "hono/jsx";
+import { RouterRoute } from "hono/types";
 const globalStyle = `
 table {
     @apply border-collapse border border-gray-400 table-auto;
@@ -10,7 +11,7 @@ th, td {
     @apply p-2;
 }
 ` // now using it like this and it transforms on client side
-const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
+const Layout: FC<{ children: Child, title?: string, routes: RouterRoute[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
     return (
         <html>
             <head>
@@ -22,8 +23,13 @@ const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ chi
                 <nav>
                     <ul>
                         {routes.map((route) => (
-                            <li key={route}>
-                                <a href={route}>{route}</a>
+                            <li key={route.method + route.path}>
+                                {route.method === 'GET' ? (
+                                    <a href={route.path}>{route.method} {route.path}</a>) :
+                                    (<form method='post' action={route.path}>
+                                        <button type="submit">{route.method} {route.path}</button>
+                                    </form>)
+                                }
                             </li>
                         ))}
                     </ul>
@@ -68,7 +74,7 @@ export function json2htmlMiddleware(app: Hono): MiddlewareHandler {
         await next();
         if (c.req.header("Accept")?.includes("text/html") && c.res.status < 300 && c.res.status >= 200 && c.res.headers.get("Content-Type")?.includes("application/json")) { // if response is json, but request is html
             const json = await c.res.json() as object | object[]
-            c.res = await c.html(<Layout title={c.req.path} routes={app.routes.map((route) => route.path)}><JsonTable data={json} /></Layout>);
+            c.res = await c.html(<Layout title={c.req.path} routes={app.routes}><JsonTable data={json} /></Layout>);
         }
     }
 }
