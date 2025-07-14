@@ -1,14 +1,22 @@
 import { Context, Hono, MiddlewareHandler, Next } from "hono";
 import { FC, Child } from "hono/jsx";
-
+import { css, cx, keyframes, Style } from 'hono/css'
+const globalClass = css`
+  :-hono-global {
+    table {
+        @apply border-collapse border border-gray-400;
+    }
+  }
+`
 const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
     return (
         <html>
             <head>
                 <title>{title}</title>
-                <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"/>
+                <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" />
+                <Style />
             </head>
-            <body>
+            <body class={globalClass}>
                 <nav>
                     <ul>
                         {routes.map((route) => (
