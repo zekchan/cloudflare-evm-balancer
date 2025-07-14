@@ -1,14 +1,24 @@
-import { Context, Next } from "hono";
+import { Context, Hono, MiddlewareHandler, Next } from "hono";
 import { FC, Child } from "hono/jsx";
 
-const Layout: FC<{ children: Child, title?: string }> = ({ children, title = 'Admin Api response' }) => {
+const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
     return (
         <html>
             <head>
                 <title>{title}</title>
                 <style></style>
             </head>
-            <body>{children}</body>
+            <body>
+                <nav>
+                    <ul>
+                        {routes.map((route) => (
+                            <li key={route}>
+                                <a href={route}>{route}</a>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+                {children}</body>
         </html>
     )
 }
@@ -40,10 +50,13 @@ function JsonTable(props: { data: object | object[] }) {
     )
 }
 
-export async function json2htmlMiddleware(c: Context, next: Next) {
-    await next();
-    if (c.req.header("Accept")?.includes("text/html") && c.res.status < 300 && c.res.status >= 200 && c.res.headers.get("Content-Type")?.includes("application/json")) { // if response is json, but request is html
-        const json = await c.res.json() as object | object[]
-        c.res = await c.html(<Layout title={c.req.path}><JsonTable data={json} /></Layout>);
+export function json2htmlMiddleware(app: Hono): MiddlewareHandler {
+    // we use app to get all routes list, so we can get navigation links
+    return async (c: Context, next: Next) => {
+        await next();
+        if (c.req.header("Accept")?.includes("text/html") && c.res.status < 300 && c.res.status >= 200 && c.res.headers.get("Content-Type")?.includes("application/json")) { // if response is json, but request is html
+            const json = await c.res.json() as object | object[]
+            c.res = await c.html(<Layout title={c.req.path} routes={app.routes.map((route) => route.path)}><JsonTable data={json} /></Layout>);
+        }
     }
 }
