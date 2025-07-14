@@ -6,7 +6,7 @@ const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ chi
         <html>
             <head>
                 <title>{title}</title>
-                <style></style>
+                <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"/>
             </head>
             <body>
                 <nav>
