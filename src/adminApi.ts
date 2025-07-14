@@ -64,7 +64,7 @@ export function adminApi(app: Hono) {
         }
         return c.json({ message: "ok" });
     })
-    app.get('/get_upstreams', async (c) => {
+    app.get('/upstreams', async (c) => {
         const heights = await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
             return {
                 name: upstream.name,
@@ -74,7 +74,7 @@ export function adminApi(app: Hono) {
         }));
         return c.json(heights);
     })
-    app.get('/get_chains', async (c) => {
+    app.get('/chains', async (c) => {
         const heights = await Promise.all(
             getChainDOs(c).map(async (chainDO) => {
                 return {
