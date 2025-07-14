@@ -10,6 +10,27 @@ th, td {
     @apply border border-gray-300 dark:border-gray-600;
     @apply p-2;
 }
+button {
+    @apply bg-blue-500 text-white p-2 rounded;
+    @apply cursor-pointer;
+    @apply hover:bg-blue-600;
+    @apply transition-colors duration-200;
+    @apply border-none;
+    @apply outline-none;
+    @apply focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+    @apply focus:outline-none;
+    @apply focus:ring-offset-2;
+    @apply focus:ring-offset-white;
+    @apply focus:ring-offset-opacity-50;
+}
+a {
+    @apply text-blue-500;
+    @apply hover:text-blue-600;
+    @apply transition-colors duration-200;
+    @apply underline;
+    @apply no-underline;
+    @apply focus:outline-none;
+}
 ` // now using it like this and it transforms on client side
 const Layout: FC<{ children: Child, title?: string, routes: RouterRoute[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
     return (
