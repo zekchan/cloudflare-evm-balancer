@@ -40,6 +40,9 @@ export class ChainDurableObject extends DurableObject<Env> {
                 height: await upstream.getHeight() || 0,
             }
         }));
+        if (heights.length === 0) {
+            throw new Error("No upstreams found");
+        }
         return heights.sort((a, b) => b.height - a.height)[0].upstream;
     }
     async getBestHeight(): Promise<number> {
