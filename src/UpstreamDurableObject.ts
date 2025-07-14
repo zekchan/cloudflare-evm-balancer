@@ -24,22 +24,28 @@ export class UpstreamDurableObject extends DurableObject<Env> {
     async getHeight(): Promise<number | undefined> {
         return this.ctx.storage.get<number>("height");
     }
-    private async updateHeight() {
+    private async request(method: string, params: any[]) {
         const url = await this.ctx.storage.get<string>("url");
         if (!url) {
             return;
         }
-        const response = await fetch(url, {
+        return fetch(url, {
             method: 'POST',
-            body: '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[], "id":1}'
+            body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 })
         })
+    }
+    private async updateHeight() {
+        const response = await this.request("eth_blockNumber", []);
+        if (!response) {
+            return;
+        }
         let result;
         try {
             result = await response.json<{ result: number }>();
         } catch (error) {
         }
         if (!response.ok) {
-            console.error({ action: "updateHeightError", url, response, result })
+            console.error({ action: "updateHeightError", response, result })
             return
         }
         if (result && result.result) {
@@ -54,7 +60,7 @@ export class UpstreamDurableObject extends DurableObject<Env> {
             this.ctx.storage.setAlarm(Date.now() + 30 * 1000);
         }
     }
-    async fetch(request: Request):  Promise<Response> {
+    async fetch(request: Request): Promise<Response> {
         const url = await this.ctx.storage.get<string>("url");
         if (!url) {
             return new Response("No url found", { status: 500 });

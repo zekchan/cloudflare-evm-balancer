@@ -7,6 +7,11 @@ import { UpstreamDurableObject } from './UpstreamDurableObject';
 const app = new Hono()
 const UPSTREAMS = [
 	{
+		chain: "bsc",
+		name: "publicnode-bsc-mainnet",
+		upstream: "https://bsc-rpc.publicnode.com",
+	},
+	{
 		chain: "celo",
 		name: "celo1",
 		upstream: "https://forno.celo.org",
