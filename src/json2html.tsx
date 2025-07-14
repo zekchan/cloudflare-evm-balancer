@@ -41,7 +41,9 @@ function JsonTable(props: { data: object | object[] }) {
                 {array.map((item, idx) => (
                     <tr key={idx}>
                         {keys.map((key) => (
-                            <td key={key}>{item[key]}</td>
+                            <td key={key}>{
+                                Array.isArray(item[key]) || typeof item[key] === 'object' ? <JsonTable data={item[key]} /> : item[key]}
+                            </td>
                         ))}
                     </tr>
                 ))}
