@@ -4,6 +4,9 @@
 POST {{host}}/admin/init_upstreams
 
 ###
+DELETE {{host}}/admin/clear_storage
+
+###
 GET {{host}}/admin/chains
 
 

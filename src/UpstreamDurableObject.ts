@@ -40,6 +40,7 @@ export class UpstreamDurableObject extends DurableObject<Env> {
             this.ctx.storage.deleteAll(),
             this.ctx.storage.deleteAlarm(),
         ]);
+        this.stats = {};
     }
     async getHeight(): Promise<number | undefined> {
         return this.ctx.storage.get<number>("height");
