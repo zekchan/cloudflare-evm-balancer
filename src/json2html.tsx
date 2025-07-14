@@ -1,6 +1,5 @@
 import { Context, Hono, MiddlewareHandler, Next } from "hono";
 import { FC, Child } from "hono/jsx";
-import { css, cx, keyframes, Style } from 'hono/css'
 const globalStyle = `
 table {
     @apply border-collapse border border-gray-400 table-auto;
