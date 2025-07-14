@@ -2,6 +2,7 @@ import { Context, Hono } from 'hono'
 import { getUpstreamConfig } from './config';
 import { basicAuth } from 'hono/basic-auth';
 import { env } from 'cloudflare:workers';
+import { json2htmlMiddleware } from './json2html';
 
 
 const UPSTREAMS = getUpstreamConfig();
@@ -26,6 +27,7 @@ export function adminApi(app: Hono) {
         username: "admin",
         password: env.ADMIN_PASSWORD!,
     }));
+    app.use(json2htmlMiddleware);
     app.delete('/clear_storage', async (c) => {
         await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
             await upstream.clearStorage();

@@ -60,5 +60,9 @@
 				"ChainDurableObject"
 			]
 		}
-	]
+	],
+	"vars": {
+		"UPSTREAM_CONFIG": "[]",
+		"ADMIN_PASSWORD": "admin"
+	}
 }
