@@ -1,22 +1,20 @@
 import { Context, Hono, MiddlewareHandler, Next } from "hono";
 import { FC, Child } from "hono/jsx";
 import { css, cx, keyframes, Style } from 'hono/css'
-const globalClass = css`
-  :-hono-global {
-    table {
-        @apply border-collapse border border-gray-400;
-    }
-  }
-`
+const globalStyle = `
+table {
+    @apply border-collapse border border-gray-400;
+}
+` // now using it like this and it transforms on client side
 const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
     return (
         <html>
             <head>
                 <title>{title}</title>
                 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" />
-                <Style />
+                <style type={"text/tailwindcss" as any} dangerouslySetInnerHTML={{ __html: globalStyle }} />
             </head>
-            <body class={globalClass}>
+            <body>
                 <nav>
                     <ul>
                         {routes.map((route) => (
