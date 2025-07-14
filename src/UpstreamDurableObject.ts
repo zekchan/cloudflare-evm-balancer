@@ -28,6 +28,11 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         super(ctx, env);
         this.ctx.blockConcurrencyWhile(async () => {
             await this.restoreStats();
+            console.log({
+                action: "restoreStats from constructor",
+                id: this.ctx.id.toString(),
+                stats: this.stats,
+            });
         });
     }
     async setUrl(url: string) {
