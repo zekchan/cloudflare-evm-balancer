@@ -3,7 +3,12 @@ import { FC, Child } from "hono/jsx";
 import { css, cx, keyframes, Style } from 'hono/css'
 const globalStyle = `
 table {
-    @apply border-collapse border border-gray-400;
+    @apply border-collapse border border-gray-400 table-auto;
+    @apply w-full;
+}
+th, td {
+    @apply border border-gray-300 dark:border-gray-600;
+    @apply p-2;
 }
 ` // now using it like this and it transforms on client side
 const Layout: FC<{ children: Child, title?: string, routes: string[] }> = ({ children, title = 'Admin Api response', routes = [] }) => {
