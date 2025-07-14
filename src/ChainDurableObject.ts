@@ -6,13 +6,17 @@ export class ChainDurableObject extends DurableObject<Env> {
     constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
     }
+    public async clearStorage() {
+        await Promise.all([
+            this.ctx.storage.deleteAll(),
+            this.ctx.storage.deleteAlarm(),
+        ]);
+    }
     async setUpstreams(upstreamsIds: DurableObjectId[]) {
         await this.ctx.storage.put("upstreams", upstreamsIds);
     }
     async addUpstream(upstreamId: string) {
-        console.log("addUpstream", upstreamId);
         let upstreams = await this.ctx.storage.get<string[]>("upstreams");
-        console.log("saved upstreams", upstreams);
         if (upstreams?.includes(upstreamId)) {
             return;
         }
@@ -21,7 +25,6 @@ export class ChainDurableObject extends DurableObject<Env> {
         } else {
             upstreams = [upstreamId];
         }
-        console.log("saving upstreams", upstreams);
         await this.ctx.storage.put("upstreams", upstreams);
     }
     async getUpstreamIds(): Promise<string[]> {

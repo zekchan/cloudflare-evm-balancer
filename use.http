@@ -12,3 +12,14 @@ GET {{host}}/admin/upstreams
 
 ###
 GET {{host}}/admin/stats    
+
+### 
+POST {{host}}/bsc
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "eth_syncing",
+  "params": [],
+  "id": 1
+}

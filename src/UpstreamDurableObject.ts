@@ -28,11 +28,6 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         super(ctx, env);
         this.ctx.blockConcurrencyWhile(async () => {
             await this.restoreStats();
-            console.log({
-                action: "restoreStats from constructor",
-                id: this.ctx.id.toString(),
-                stats: this.stats,
-            });
         });
     }
     async setUrl(url: string) {
@@ -40,7 +35,12 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         await this.ctx.storage.setAlarm(Date.now() + 1000);
         this.updateHeight();
     }
-
+    public async clearStorage() {
+        await Promise.all([
+            this.ctx.storage.deleteAll(),
+            this.ctx.storage.deleteAlarm(),
+        ]);
+    }
     async getHeight(): Promise<number | undefined> {
         return this.ctx.storage.get<number>("height");
     }
@@ -59,7 +59,7 @@ export class UpstreamDurableObject extends DurableObject<Env> {
         const stats = this.stats[method] || { count: 0, totalTime: 0, errors: 0 };
         stats.count++;
         stats.totalTime += duration;
-        this.stats[url] = stats;
+        this.stats[method] = stats;
         return response;
     }
     private async updateHeight() {
@@ -82,7 +82,8 @@ export class UpstreamDurableObject extends DurableObject<Env> {
     }
     async alarm(): Promise<void> {
         try {
-            await Promise.all([this.updateHeight(), this.saveStats()]);
+            await this.updateHeight();
+            await this.saveStats();
         } catch (error) {
         } finally {
             this.ctx.storage.setAlarm(Date.now() + 30 * 1000);

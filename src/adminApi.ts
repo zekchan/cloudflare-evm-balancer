@@ -52,6 +52,16 @@ function getChainDOs(c: Context) {
     })
 }
 export function adminApi(app: Hono) {
+    app.delete('/clear_storage', async (c) => {
+        const { UPSTREAM_DO, CHAIN_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject>, CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+        await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
+            await upstream.clearStorage();
+        }));
+        await Promise.all(getChainDOs(c).map(async (chainDO) => {
+            await chainDO.clearStorage();
+        }));
+        return c.json({ message: "ok" });
+    })
     app.post('/init_upstreams', async (c) => {
         const { UPSTREAM_DO, CHAIN_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject>, CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
         for (const { upstream: upstreamUrl, name, chain } of UPSTREAMS) {
