@@ -1,7 +1,7 @@
 import { Context, Hono } from 'hono'
 import { UpstreamDurableObject } from './UpstreamDurableObject';
 import { ChainDurableObject } from './ChainDurableObject';
-import { env } from 'hono/adapter';
+import { getDONameSpace } from './utils';
 const UPSTREAMS = [
     {
         chain: "bsc",
@@ -34,8 +34,10 @@ const UPSTREAMS = [
         upstream: "https://ethereum-rpc.publicnode.com",
     },
 ]
+
+
 function getUpstreamDOs(c: Context) {
-    const { UPSTREAM_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject> }>(c);
+    const UPSTREAM_DO = getDONameSpace<UpstreamDurableObject>("UPSTREAM_DO");
     return UPSTREAMS.map(({ name }) => {
         const upstreamId = UPSTREAM_DO.idFromName(name);
         const upstream = UPSTREAM_DO.get(upstreamId);
@@ -43,7 +45,7 @@ function getUpstreamDOs(c: Context) {
     })
 }
 function getChainDOs(c: Context) {
-    const { CHAIN_DO } = env<{ CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+    const CHAIN_DO = getDONameSpace<ChainDurableObject>("CHAIN_DO");
     const chains = new Set(UPSTREAMS.map(({ chain }) => chain));
     return Array.from(chains).map((chain) => {
         const chainDOId = CHAIN_DO.idFromName(chain);
@@ -53,7 +55,6 @@ function getChainDOs(c: Context) {
 }
 export function adminApi(app: Hono) {
     app.delete('/clear_storage', async (c) => {
-        const { UPSTREAM_DO, CHAIN_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject>, CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
         await Promise.all(getUpstreamDOs(c).map(async (upstream) => {
             await upstream.clearStorage();
         }));
@@ -63,7 +64,8 @@ export function adminApi(app: Hono) {
         return c.json({ message: "ok" });
     })
     app.post('/init_upstreams', async (c) => {
-        const { UPSTREAM_DO, CHAIN_DO } = env<{ UPSTREAM_DO: DurableObjectNamespace<UpstreamDurableObject>, CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+        const UPSTREAM_DO = getDONameSpace<UpstreamDurableObject>("UPSTREAM_DO");
+        const CHAIN_DO = getDONameSpace<ChainDurableObject>("CHAIN_DO");
         for (const { upstream: upstreamUrl, name, chain } of UPSTREAMS) {
             const upstreamId = UPSTREAM_DO.idFromName(name);
             const upstream = UPSTREAM_DO.get(upstreamId);

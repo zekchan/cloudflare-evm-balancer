@@ -1,15 +1,14 @@
-import { DurableObject } from 'cloudflare:workers';
-import { Context, Hono } from 'hono'
-import { env } from 'hono/adapter';
+import { Hono } from 'hono'
 import { ChainDurableObject } from './ChainDurableObject';
 import { UpstreamDurableObject } from './UpstreamDurableObject';
 import { adminApi } from './adminApi';
+import { env } from 'cloudflare:workers';
 const app = new Hono()
 
 adminApi(app.basePath('/admin'));
 // main request handler
 app.post('/:chain', async (c) => {
-	const { CHAIN_DO } = env<{ CHAIN_DO: DurableObjectNamespace<ChainDurableObject> }>(c);
+	const { CHAIN_DO } = env
 	const chain = c.req.param('chain');
 	const chainDOId = CHAIN_DO.idFromName(chain);
 	const chainDO = CHAIN_DO.get(chainDOId);
